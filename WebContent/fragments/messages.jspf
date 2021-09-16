@@ -1,0 +1,8 @@
+		<c:if test="${not empty successMsg}">
+			<div class="alert alert-success">${successMsg}</div>
+			<c:remove var="successMsg" scope="session" />
+		</c:if>
+		<c:if test="${not empty errorMsg}">
+			<div class="alert alert-error">${errorMsg}</div>
+			<c:remove var="errorMsg" scope="session" />
+		</c:if>

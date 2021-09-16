@@ -1,0 +1,74 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+
+<fmt:setLocale value="${lang}" />
+<fmt:setBundle basename="messages"/>
+<html>
+<head>
+
+    <title>
+    	<fmt:message key="app.title">
+    		<fmt:param value="${page}" />
+    	</fmt:message>
+    </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+</head>
+<body>
+<div class="container-fluid bg-light">
+
+<div class="row">
+<div class="col11">
+	<!--  <p class="navbar-brand text-secondary">Cashier</p>-->
+	<c:if test="${not empty user}">
+	<div class="btn-group">
+	<form method="get">
+  		<button formaction="productgetall" class="btn btn-outline-info btn-sm">Products</button>
+  		<c:set var="matched" scope="page" value="false"/>
+  		<c:forEach var="role" items="${user.roles}">
+  		<c:if test="${matched == 'false' && (role == 'CASHIER' || role == 'MANAGER')}">
+  			<button formaction="chequegetall" class="btn btn-outline-info btn-sm">Cheques</button> 
+  			<c:set var="matched" scope="page" value="true"/>
+  		</c:if>
+  		</c:forEach>
+  		
+  		<c:forEach var="role" items="${user.roles}">
+  		<c:if test="${role == 'MANAGER'}">	
+  			<button formaction="shiftgetall" class="btn  btn-outline-info btn-sm">Shift</button>
+  		</c:if>
+  		</c:forEach>
+  		
+  		<button formaction="logout" class="btn btn-outline-info btn-sm">Logout</button>
+  	</form>
+	</div>
+	</c:if>
+</div>
+
+
+
+	<div class=" navbar container col1  sticky-to justify-content-end">
+		
+	<div class=row>
+				<div>
+			<span class="text-center text-secondary text-sm">
+			&nbsp; ${user.name} &nbsp;&nbsp;
+			</span>
+				</div>
+					<div class="nav-item">${lang!='en'?'<a class="nav-link" href="?sessionLocale=en">En</a>':'En'}
+					</div>
+					<div class="nav-item">
+  					 ${lang!='ua'?'<a class="nav-link" href="?sessionLocale=ua">Укр</a>':'Укр'} 
+ 				 </div>
+ 			</div>
+		</div>
+</div>
+ </div>
+
+</div>
+

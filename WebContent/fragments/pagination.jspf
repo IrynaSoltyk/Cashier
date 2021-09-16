@@ -1,0 +1,24 @@
+
+<!-- PAGINATION -->
+<div class="container">
+	<table border="0" cellpadding="5" cellspacing="5">
+		<tr>
+			<c:if test="${pagesN>1}">
+				<c:forEach begin="1" end="${pagesN}" var="i">
+					<c:choose>
+						<c:when test="${pageN eq i}">
+							<td>${i}</td>
+						</c:when>
+						<c:otherwise>
+							<td><a
+								href="?page=${i}&limit=${limit}<c:if test="not empty param.chequeId">
+                        &${param.chequeId}
+                        </c:if>
+                        ">${i}</a></td>
+						</c:otherwise>
+					</c:choose>
+				</c:forEach>
+			</c:if>
+		</tr>
+	</table>
+</div>

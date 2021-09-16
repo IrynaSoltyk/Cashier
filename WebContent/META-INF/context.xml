@@ -1,0 +1,6 @@
+<Context>
+<Resource name="jdbc/cashier_database" auth="Container"
+        type="javax.sql.DataSource" username="user" password="123"
+        driverClassName="com.mysql.cj.jdbc.Driver"
+        url="jdbc:mysql://localhost/cashier_database" />
+</Context>
