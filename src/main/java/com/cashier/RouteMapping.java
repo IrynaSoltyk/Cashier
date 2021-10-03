@@ -24,11 +24,12 @@ import com.cashier.controllers.ProductEditController;
 import com.cashier.controllers.ProductUpdateController;
 import com.cashier.controllers.ProductsGetAllController;
 import com.cashier.controllers.ReportController;
+import com.cashier.controllers.RoutingEntity;
 import com.cashier.controllers.ShiftCloseController;
 import com.cashier.controllers.ShiftGetAllController;
 import com.cashier.controllers.ShiftOpenController;
 import com.cashier.models.Role;
-import com.cashier.models.RoutingEntity;
+
 
 public class RouteMapping {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());

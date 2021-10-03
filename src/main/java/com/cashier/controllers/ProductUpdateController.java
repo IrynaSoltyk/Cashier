@@ -8,14 +8,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ProductDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Product;
 import com.cashier.models.Units;
-import com.cashier.service.ProductService;
 
 
-public class ProductUpdateController implements Controller{
+public class ProductUpdateController extends ControllerBase{
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ProductUpdateController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -25,10 +30,10 @@ public class ProductUpdateController implements Controller{
 	product.setPrice(new BigDecimal(request.getParameter("price")));
 	product.setAmount(Integer.parseInt(request.getParameter("amount")));
 	product.setUnits(Units.valueOf(request.getParameter("units")));	
-		ProductService pus = new ProductService();
+		ProductDao dao = new ProductDao(connectionProvider);
 	
 		try {
-			pus.updateProduct(product);
+			dao.update(product);
 			request.getSession().setAttribute("successMsg", "Changes have been successfully saved");
 			
 		} catch (UnsuccessfulRequestException e) {	

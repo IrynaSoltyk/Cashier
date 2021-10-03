@@ -10,7 +10,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 import com.cashier.RouteMapping;
 import com.cashier.models.Role;
-import com.cashier.models.RoutingEntity;
+import com.cashier.controllers.RoutingEntity;
 
 public class AuthorizationTag extends SimpleTagSupport {
 	private List<Role> userRoles;

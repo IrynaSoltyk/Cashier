@@ -11,17 +11,7 @@
 <div>
 	<c:choose>
 		<c:when test="${not empty shifts}">
-			<div class=row">
-				<div class="col10">
-					<span class="badge">${count}</span> shifts in total
-				</div>
-
-				<div class="col2">
-					Show: <a href="?limit=5">5</a>|<a href="?limit=10">10</a>|<a
-						href="?limit=15">15</a>
-
-				</div>
-			</div>
+			<%@ include file="fragments/limit.jspf"%>
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -77,25 +67,9 @@
 		</c:otherwise>
 	</c:choose>
 </div>
-<!-- PAGINATION -->
-<div class="container">
-	<table border="0" cellpadding="5" cellspacing="5">
-		<tr>
-			<c:if test="${pagesN>1}">
-				<c:forEach begin="1" end="${pagesN}" var="i">
-					<c:choose>
-						<c:when test="${pageN eq i}">
-							<td>${i}</td>
-						</c:when>
-						<c:otherwise>
-							<td><a href="shiftgetall?page=${i}&limit=${limit}">${i}</a></td>
-						</c:otherwise>
-					</c:choose>
-				</c:forEach>
-			</c:if>
-		</tr>
-	</table>
-</div>
+
+<%@ include file="fragments/pagination.jspf"%>
+
 <br>
 <br>
 <div class="container">

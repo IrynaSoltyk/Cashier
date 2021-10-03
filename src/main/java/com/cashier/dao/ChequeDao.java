@@ -17,24 +17,25 @@ import org.apache.log4j.Logger;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Cheque;
 import com.cashier.models.ChequeProduct;
-import com.cashier.models.RequestEntity;
+import com.cashier.dao.RequestEntity;
 import com.cashier.models.Units;
 import com.cashier.models.User;
-import com.cashier.service.ConnectionPool;
 import com.cashier.utils.ProductsLock;
 
 public class ChequeDao {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	private final ConnectionProvider connectionProvider;
 
-	private ChequeDao() {
+	public ChequeDao(ConnectionProvider connectionProvider) {
+		this.connectionProvider = connectionProvider;
 	}
 
-	public static Cheque create(Cheque cheque) throws UnsuccessfulRequestException {
-		String sql = "INSERT INTO CHEQUES (CREATED_BY, SHIFT_ID) VALUES (?,?)";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public  Cheque create(Cheque cheque) throws UnsuccessfulRequestException {
+		final String sql = "INSERT INTO CHEQUES (CREATED_BY, SHIFT_ID) VALUES (?,?)";
+
 		int createdId = cheque.getCreatedBy().getUserId();
 		int shiftId = cheque.getShiftId();
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
 			int k = 0;
@@ -57,9 +58,10 @@ public class ChequeDao {
 		return cheque;
 
 	}
-
-	public static Cheque get(int checkId) throws UnsuccessfulRequestException {
-		String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE,"
+	
+	
+	public Cheque get(int checkId) throws UnsuccessfulRequestException {
+		final String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE,"
 				+ " ucreated.ID AS created_id, ucreated.NAME AS created_name," + " cp.AMOUNT, cp.PRICE, cp.ID as CP_ID,"
 				+ " p.NAME, p.UNITS, p.ID as P_ID,"
 				+ " ucancelled.ID AS cancelled_id, ucancelled.NAME AS cancelled_name" + " FROM CHEQUES AS c"
@@ -67,9 +69,8 @@ public class ChequeDao {
 				+ " LEFT JOIN CHEQUES_PRODUCTS AS cp ON c.ID = cp.CHEQUE_ID"
 				+ " LEFT JOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFT JOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID" + " WHERE c.ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
 		Cheque result = new Cheque();
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+		try (Connection con = connectionProvider.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
 
 			st.setInt(1, checkId);
 
@@ -141,10 +142,10 @@ public class ChequeDao {
 		return result;
 	}
 
-	public static RequestEntity getAllInShift(int shiftId) throws UnsuccessfulRequestException {
-		String countSql = "SELECT COUNT(ID) FROM CHEQUES WHERE SHIFT_ID = ?";
+	public RequestEntity getAllInShift(int shiftId) throws UnsuccessfulRequestException {
+		final String countSql = "SELECT COUNT(ID) FROM CHEQUES WHERE SHIFT_ID = ?";
 
-		String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
+		final String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
 				+ "ucreated.ID AS created_id, ucreated.NAME AS created_name," + "cp.AMOUNT, cp.PRICE, cp.ID as CP_ID,"
 				+ "p.NAME, p.UNITS," + "ucancelled.ID AS cancelled_id, ucancelled.NAME AS cancelled_name"
 				+ " FROM (SELECT ID, SHIFT_ID, CREATED_DATE, CANCELLED_DATE, CREATED_BY, CANCELLED_BY "
@@ -154,9 +155,8 @@ public class ChequeDao {
 				+ " LEFT JOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFT JOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID " + "ORDER BY c.ID DESC";
 
-		ConnectionPool cp = ConnectionPool.getInstance();
 		RequestEntity result = new RequestEntity();
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql);
 				PreparedStatement countSt = con.prepareStatement(countSql)) {
 			int k = 0;
@@ -168,16 +168,16 @@ public class ChequeDao {
 
 		} catch (SQLException e) {
 			logger.error("Failed get all cheques", e);
-			throw new UnsuccessfulRequestException("Unsuccessfull 'getAll' request", e.getCause());
+			throw new UnsuccessfulRequestException("Unsuccessfull 'getAll' request", e);
 		}
 		return result;
 	}
 
-	public static RequestEntity getAllInShiftForUser(int shiftId, int userId, int limit, int offset)
+	public RequestEntity getAllInShiftForUser(int shiftId, int userId, int limit, int offset)
 			throws UnsuccessfulRequestException {
-		String countSql = "SELECT COUNT(ID) FROM CHEQUES WHERE SHIFT_ID = ? AND CREATED_BY = ?";
+		final String countSql = "SELECT COUNT(ID) FROM CHEQUES WHERE SHIFT_ID = ? AND CREATED_BY = ?";
 
-		String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
+		final String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
 				+ "ucreated.ID AS created_id, ucreated.NAME AS created_name," + "cp.AMOUNT, cp.PRICE, cp.ID as CP_ID,"
 				+ "p.NAME, p.UNITS," + "ucancelled.ID AS cancelled_id, ucancelled.NAME AS cancelled_name"
 				+ " FROM (SELECT ID, SHIFT_ID, CREATED_DATE, CANCELLED_DATE, CREATED_BY, CANCELLED_BY "
@@ -187,9 +187,8 @@ public class ChequeDao {
 				+ " LEFT JOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFT JOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID " + "ORDER BY c.ID DESC";
 
-		ConnectionPool cp = ConnectionPool.getInstance();
 		RequestEntity result = new RequestEntity();
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql);
 				PreparedStatement countSt = con.prepareStatement(countSql)) {
 			int k = 0;
@@ -209,10 +208,10 @@ public class ChequeDao {
 		return result;
 	}
 
-	public static RequestEntity getAll(int limit, int offset) throws UnsuccessfulRequestException {
-		String countSql = "SELECT COUNT(ID)" + " FROM CHEQUES";
+	public RequestEntity getAll(int limit, int offset) throws UnsuccessfulRequestException {
+		final String countSql = "SELECT COUNT(ID)" + " FROM CHEQUES";
 
-		String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
+		final String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
 				+ " ucreated.ID AS created_id, ucreated.NAME AS created_name," + " cp.AMOUNT, cp.PRICE, cp.ID as CP_ID,"
 				+ " p.NAME, p.UNITS," + " ucancelled.ID AS cancelled_id, ucancelled.NAME AS cancelled_name"
 				+ " FROM (SELECT ID, SHIFT_ID, CREATED_DATE, CANCELLED_DATE, CREATED_BY, CANCELLED_BY "
@@ -221,9 +220,8 @@ public class ChequeDao {
 				+ " LEFT JOIN CHEQUES_PRODUCTS AS cp ON c.ID = cp.CHEQUE_ID"
 				+ " LEFT JOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFT JOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID " + "ORDER BY c.ID DESC";
-		ConnectionPool cp = ConnectionPool.getInstance();
 		RequestEntity result = new RequestEntity();
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql);
 				PreparedStatement countSt = con.prepareStatement(countSql)) {
 
@@ -240,14 +238,14 @@ public class ChequeDao {
 		return result;
 	}
 
-	public static RequestEntity getAllforUser(int limit, int offset) throws UnsuccessfulRequestException {
-		String countSql = "SELECT COUNT(c.ID)" + " FROM CHEQUES AS c"
+	public RequestEntity getAllforUser(int limit, int offset) throws UnsuccessfulRequestException {
+		final String countSql = "SELECT COUNT(c.ID)" + " FROM CHEQUES AS c"
 				+ " INNER JOIN USERS AS ucreated ON c.CREATED_BY = ucreated.ID"
 				+ " LEFTJOIN CHEQUES_PRODUCTS AS cp ON c.ID = cp.CHEQUE_ID"
 				+ " LEFTJOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFTJOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID";
 
-		String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
+		final String sql = "SELECT c.ID, c.SHIFT_ID, c.CREATED_DATE, c.CANCELLED_DATE, "
 				+ " ucreated.ID AS created_id, ucreated.NAME AS created_name," + " cp.AMOUNT, cp.PRICE, cp.ID as CP_ID,"
 				+ " p.NAME, p.UNITS," + " ucancelled.ID AS cancelled_id, ucancelled.NAME AS cancelled_name"
 				+ " FROM CHEQUES AS c" + " INNER JOIN USERS AS ucreated ON c.CREATED_BY = ucreated.ID"
@@ -255,9 +253,8 @@ public class ChequeDao {
 				+ " LEFT JOIN PRODUCTS AS p ON cp.PRODUCT_ID = p.ID "
 				+ " LEFT JOIN USERS as ucancelled ON c.CANCELLED_BY = ucancelled.ID" + " WHERE ucreated.NAME =?"
 				+ " ORDER BY c.CREATED_DATE DESC, c.ID ASC" + " LIMIT = ? OFFSET = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
 		RequestEntity result = new RequestEntity();
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql);
 				PreparedStatement countSt = con.prepareStatement(countSql)) {
 
@@ -274,7 +271,7 @@ public class ChequeDao {
 		return result;
 	}
 
-	private static void collectCheques(RequestEntity result, PreparedStatement st, PreparedStatement countSt)
+	private void collectCheques(RequestEntity result, PreparedStatement st, PreparedStatement countSt)
 			throws SQLException {
 		List<Cheque> objects = new ArrayList<>();
 
@@ -304,11 +301,9 @@ public class ChequeDao {
 				}
 
 				int shiftId = rs.getInt("SHIFT_ID");
-				Instant date = null;
-				if (rs.getTimestamp("c.CREATED_DATE") != null) {
-					date = rs.getTimestamp("CREATED_DATE").toInstant();
-
-				}
+				Timestamp ts = rs.getTimestamp("CREATED_DATE");
+				Instant date = ts!= null? ts.toInstant():null;
+				
 				Integer createdId = rs.getInt("CREATED_ID");
 				String createdName = rs.getString("CREATED_NAME");
 				Instant cancelledDate = null;
@@ -358,11 +353,10 @@ public class ChequeDao {
 		}
 	}
 
-	public static void closeCheque(int chequeId) throws UnsuccessfulRequestException {
-		String sql = "UPDATE CHEQUES SET CREATED_DATE = ? WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public void closeCheque(int chequeId) throws UnsuccessfulRequestException {
+		final String sql = "UPDATE CHEQUES SET CREATED_DATE = ? WHERE ID = ?";
 
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+		try (Connection con = connectionProvider.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
 
 			int k = 0;
 			st.setTimestamp(++k, Timestamp.from(Instant.now()));
@@ -375,11 +369,10 @@ public class ChequeDao {
 		}
 	}
 
-	public static void deleteCheque(int chequeId) throws UnsuccessfulRequestException {
-		String sql = "DELETE FROM CHEQUES WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public void deleteCheque(int chequeId) throws UnsuccessfulRequestException {
+		final String sql = "DELETE FROM CHEQUES WHERE ID = ?";
 
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+		try (Connection con = connectionProvider.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
 
 			int k = 0;
 			st.setInt(++k, chequeId);
@@ -391,14 +384,16 @@ public class ChequeDao {
 		}
 	}
 
-	public static void cancelCheque(Cheque cheque) throws UnsuccessfulRequestException {
-		String sql = "UPDATE CHEQUES SET CANCELLED_DATE = ?, CANCELLED_BY = ? WHERE ID = ?";
+	public void cancelCheque(Cheque cheque) throws UnsuccessfulRequestException {
+		final String sql = "UPDATE CHEQUES SET CANCELLED_DATE = ?, CANCELLED_BY = ? WHERE ID = ?";
 
-		String changeSql = "UPDATE PRODUCTS AS p INNER JOIN CHEQUES_PRODUCTS AS cp ON cp.PRODUCT_ID = p.ID "
-				+ "set p.AMOUNT = p.AMOUNT + cp.AMOUNT WHERE cp. CHEQUE_ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+//		final String changeSql = "UPDATE PRODUCTS AS p INNER JOIN CHEQUES_PRODUCTS AS cp ON cp.PRODUCT_ID = p.ID "
+//				+ "set p.AMOUNT = p.AMOUNT + cp.AMOUNT WHERE cp. CHEQUE_ID = ?";
+		
+		final String changeSql = "update products p set p.amount = (select p.amount + cp.amount from cheques_products cp where cp.product_id = p.id and cp.cheque_id = ?)"; 
+		
 		synchronized (ProductsLock.class) {
-			try (Connection con = cp.getConnection()) {
+			try (Connection con = connectionProvider.getConnection()) {
 				try (PreparedStatement st = con.prepareStatement(sql);
 						PreparedStatement changeSt = con.prepareStatement(changeSql)) {
 
@@ -418,11 +413,11 @@ public class ChequeDao {
 				} catch (SQLException e) {
 					con.rollback();
 					logger.error("Failed to cancel cheque", e);
-					throw new UnsuccessfulRequestException("Unsuccessfull 'cheque cancel' request", e.getCause());
+					throw new UnsuccessfulRequestException("Unsuccessfull 'cheque cancel' request", e);
 				}
 			} catch (SQLException e) {
 				logger.error("Failed to cancel cheque", e);
-				throw new UnsuccessfulRequestException("Unsuccessfull 'cheque cancel' request", e.getCause());
+				throw new UnsuccessfulRequestException("Unsuccessfull 'cheque cancel' request", e);
 			}
 		}
 	}

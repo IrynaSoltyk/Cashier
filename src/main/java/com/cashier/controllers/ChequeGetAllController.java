@@ -7,15 +7,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ShiftDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
-import com.cashier.models.RequestEntity;
+import com.cashier.dao.RequestEntity;
 import com.cashier.models.Role;
 import com.cashier.models.User;
-import com.cashier.service.ChequeService;
-import com.cashier.service.ShiftService;
 
-public class ChequeGetAllController implements Controller {
+
+public class ChequeGetAllController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ChequeGetAllController(ConnectionProvider connectionProvider) {
+	super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -30,23 +36,25 @@ public class ChequeGetAllController implements Controller {
 			if (request.getParameter("limit") != null) {
 				limit = Integer.parseInt(request.getParameter("limit"));
 			}
-			if (request.getParameter("shiftId") != null && request.getParameter("shiftId")!="") {
-				shiftId = Integer.parseInt(request.getParameter("shiftId"));
-			} else {
-				ShiftService shiftService = new ShiftService();
-				shiftId = shiftService.getCurrentShiftId();
+			//if (request.getParameter("shiftId") != null && request.getParameter("shiftId")!="") {
+			//	shiftId = Integer.parseInt(request.getParameter("shiftId"));
+			//} else {
+				ShiftDao shiftDao = new ShiftDao(connectionProvider);
+				shiftId = shiftDao.getCurrentShiftId();
 				request.setAttribute("shiftId", shiftId);
-			}
+		//	}
 			
 			User user = ((User)request.getSession().getAttribute("user"));
-			logger.info("user "+ user.getName());
-				ChequeService service = new ChequeService();
+				ChequeDao dao = new ChequeDao(connectionProvider);
 				RequestEntity re = null;
+				
+				int offset = (page - 1) * limit;
+				
 				if (user.getRoles().contains(Role.MANAGER)) {
-					re = service.getAllCheques(page-1, limit);
+					re = dao.getAll(limit, offset);
 				}
 				else {
-					re = service.getAllInShiftForUser(shiftId, user.getUserId(), page-1, limit);
+					re = dao.getAllInShiftForUser(shiftId, user.getUserId(), limit, offset);
 				}
 				int count = re.getCount();
 				request.setAttribute("cheques", re.getObjects());

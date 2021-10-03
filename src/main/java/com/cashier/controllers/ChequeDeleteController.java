@@ -7,12 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ConnectionProvider;
 import com.cashier.exeptions.UnsuccessfulRequestException;
-import com.cashier.service.ChequeService;
 
-public class ChequeDeleteController implements Controller {
+public class ChequeDeleteController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
 	
+	public ChequeDeleteController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
+
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
 		int chequeId = -1;
@@ -20,11 +25,14 @@ public class ChequeDeleteController implements Controller {
 			chequeId = Integer.parseInt(request.getParameter("chequeId"));
 		}
 		
-		ChequeService service = new ChequeService();
+		ChequeDao dao = new ChequeDao(connectionProvider);
 		try {
-			service.deleteCheque(chequeId);
+			
+			dao.deleteCheque(chequeId);
+			
 			request.getSession().setAttribute("successMsg", "Cheque has been successfully deleted");
 			return new RedirectControllerResponse("chequegetall");
+			
 		} catch (UnsuccessfulRequestException e) {
 			logger.error("Failed delete cheque", e);
 			request.getSession().setAttribute("errorMsg", "Cant delete this cheque");

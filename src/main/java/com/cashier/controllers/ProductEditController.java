@@ -7,12 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ProductDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Product;
-import com.cashier.service.ProductService;
 
-public class ProductEditController implements Controller {
+public class ProductEditController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ProductEditController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -23,8 +28,8 @@ public class ProductEditController implements Controller {
 				id = Integer.parseInt(request.getParameter("productId"));
 			}
 			if (id > 0) {
-				ProductService service = new ProductService();
-				Product product = service.getProduct(id);
+				ProductDao dao = new ProductDao(connectionProvider);
+				Product product = dao.get(id);
 				request.setAttribute("product", product);
 				request.setAttribute("action", "edit");			
 			}				

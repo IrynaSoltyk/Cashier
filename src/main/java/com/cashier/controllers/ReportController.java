@@ -9,14 +9,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ConnectionProvider;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Cheque;
 import com.cashier.models.Report;
-import com.cashier.models.RequestEntity;
-import com.cashier.service.ChequeService;
+import com.cashier.dao.RequestEntity;
 
-public class ReportController implements Controller {
+public class ReportController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ReportController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -29,8 +34,8 @@ public class ReportController implements Controller {
 			type = request.getParameter("type");
 		}
 		try {
-			ChequeService service = new ChequeService();
-			RequestEntity re = service.getAllinShift(shiftId);
+			ChequeDao dao = new ChequeDao(connectionProvider);
+			RequestEntity re = dao.getAllInShift(shiftId);
 			int cancelled = 0;
 			int closed = 0;
 			BigDecimal cancelledCost = BigDecimal.ZERO;
@@ -52,6 +57,7 @@ public class ReportController implements Controller {
 			report.setCancelled(cancelled);
 			report.setCancelledCost(cancelledCost);
 			report.setClosedCost(closedCost);
+			
 			request.setAttribute("report", report);
 			request.setAttribute("type", type);
 			request.setAttribute("shiftId", shiftId);

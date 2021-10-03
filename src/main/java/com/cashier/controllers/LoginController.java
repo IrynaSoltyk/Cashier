@@ -8,13 +8,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.UserDao;
 import com.cashier.models.Role;
 import com.cashier.models.User;
-import com.cashier.service.UserService;
 
 
-public class LoginController implements Controller {
+public class LoginController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public LoginController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -22,8 +27,8 @@ public class LoginController implements Controller {
 		String login = request.getParameter("login");
 		String password = request.getParameter("password");
 		try {
-			UserService  service = new UserService();
-			User user = service.getUser(login);
+			UserDao  dao = new UserDao(connectionProvider);
+			User user = dao.getUser(login);
 			if (user != null && password.equals(user.getPassword())) {
 				if(user.getRoles() == null) {
 					return new ForwardControllerResponse("about.jsp");
@@ -38,7 +43,7 @@ public class LoginController implements Controller {
 				}
 				return new ForwardControllerResponse(returnPath); 
 			} else {
-				request.getSession().setAttribute("errorMsg", "Please check your login or password");
+				request.getSession().setAttribute("loginErrorMsg", "Please check your login or password");
 			}
 		} catch(Exception e) {
 			logger.error("Failed to login", e);

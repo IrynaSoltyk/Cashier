@@ -13,7 +13,10 @@
 		<fmt:message key="login.label.title" />
 	</h2>
 	<form action="login" method="post">
-<%@ include file="fragments/messages.jspf"%>
+		<c:if test="${not empty loginErrorMsg}">
+			<div class="alert alert-error">${loginErrorMsg}</div>
+			<c:remove var="errorMsg" scope="session" />
+		</c:if>
 	<div>
 			<label for="login"><fmt:message key="login.label.login" />:</label>
 			<input type="text" class="form-control" id="login" name="login"

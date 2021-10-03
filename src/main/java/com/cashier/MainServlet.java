@@ -24,29 +24,13 @@ public class MainServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// String forwardAddress = process(request, response);
-		// request.getRequestDispatcher(forwardAddress).forward(request, response);
 		process(request, response);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// String forwardAddress = process(request, response);
-		// request.getRequestDispatcher(forwardAddress).forward(request,
-		// response);//.sendRedirect(redirectAddress);
-		process(request, response);
-	}
 
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		process(request, response);
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
 		process(request, response);
 	}
 

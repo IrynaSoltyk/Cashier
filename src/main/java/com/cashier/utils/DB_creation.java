@@ -55,6 +55,7 @@ package com.cashier.utils;
 				                    " units INTEGER NOT NULL, \n" +
 				                    " price DECIMAL(19,2) NOT NULL, \n" +
 				                    " amount INTEGER NOT NULL, \n" +
+				                    " deleted BOOLEAN DEFAULT FALSE, \n" +
 				                    " PRIMARY KEY (id)"+
 				                    " );";
 				            statement.execute(sql);
@@ -77,6 +78,7 @@ package com.cashier.utils;
 				                    " shift_id INTEGER NOT NULL, \n" +
 				                    " cancelled_date TIMESTAMP NULL, \n" +
 				                    " cancelled_by INTEGER NULL, \n" +
+				                    " cancelled_shift_id INTEGER NULL, \n" +
 				                    " PRIMARY KEY (id),"+
 				                    " INDEX(created_by), INDEX(shift_id), INDEX(cancelled_by),"+
 				                    " FOREIGN KEY(created_by) REFERENCES users(id),"+

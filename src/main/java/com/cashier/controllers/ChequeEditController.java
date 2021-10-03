@@ -7,18 +7,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ShiftDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Cheque;
 import com.cashier.models.User;
-import com.cashier.service.ChequeService;
-import com.cashier.service.ShiftService;
 
-public class ChequeEditController implements Controller {
+public class ChequeEditController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ChequeEditController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
-		ChequeService service = new ChequeService();
+		ChequeDao dao = new ChequeDao(connectionProvider);
 		Cheque cheque = new Cheque();
 		User createdBy = null;
 		int chequeId = -1;
@@ -35,19 +40,19 @@ public class ChequeEditController implements Controller {
 			}
 
 			if (action.equals("edit")) { //edit
-				cheque = service.get(chequeId);
+				cheque = dao.get(chequeId);
 				request.setAttribute("cheque", cheque);
 			}
 			else { //add
-				ShiftService shiftService = new ShiftService();
-				int openShiftId = shiftService.getCurrentShiftId();
+				ShiftDao shiftDao = new ShiftDao(connectionProvider);
+				int openShiftId = shiftDao.getCurrentShiftId();
 				if (openShiftId < 1) {
 					request.getSession().setAttribute("errorMsg", "No open shifts. Unable to create new cheque");
 					return new RedirectControllerResponse("chequegetall");
 				}
 				cheque.setCreatedBy(createdBy);
 				cheque.setShiftId(openShiftId);
-				service.create(cheque);
+				dao.create(cheque);
 				logger.info("id="+cheque.getId());
 				request.setAttribute("cheque", cheque);
 				

@@ -14,21 +14,21 @@ import org.apache.log4j.Logger;
 
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Product;
-import com.cashier.models.RequestEntity;
+import com.cashier.dao.RequestEntity;
 import com.cashier.models.Units;
-import com.cashier.service.ConnectionPool;
 
 public class ProductDao {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
-	
-	private ProductDao() {
+	private final ConnectionProvider connectionProvider;
+
+	public ProductDao(ConnectionProvider connectionProvider) {
+		this.connectionProvider = connectionProvider;
 	}
 
-	public static void create(Product product) throws UnsuccessfulRequestException {
-		String sql = "INSERT INTO PRODUCTS (NAME, UNITS, PRICE, AMOUNT) VALUES (?,?,?,?)";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public void create(Product product) throws UnsuccessfulRequestException {
+		final String sql = "INSERT INTO PRODUCTS (NAME, UNITS, PRICE, AMOUNT) VALUES (?,?,?,?)";
 
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			int k = 0;
 			st.setString(++k, product.getName());
@@ -50,13 +50,13 @@ public class ProductDao {
 		}
 	}
 
-	public static RequestEntity searchAllProducts(String pattern, int limit, int offset)
+	public RequestEntity searchAllProducts(String pattern, int limit, int offset)
 			throws UnsuccessfulRequestException {
 		RequestEntity result = new RequestEntity();
-		String countSql = "SELECT COUNT(ID) FROM PRODUCTS WHERE NAME LIKE ? OR CAST(ID AS CHAR(20)) LIKE ?";
-		String sql = "SELECT * FROM PRODUCTS WHERE NAME LIKE ? OR CAST(ID AS CHAR(20)) LIKE ? LIMIT ? OFFSET ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
-		try (Connection con = cp.getConnection(); 
+		final String countSql = "SELECT COUNT(ID) FROM PRODUCTS WHERE DELETED = FALSE AND NAME LIKE ? OR CAST(ID AS CHAR(20)) LIKE ?";
+		final String sql = "SELECT * FROM PRODUCTS WHERE DELETED = FALSE AND NAME LIKE ? OR CAST(ID AS CHAR(20)) LIKE ? LIMIT ? OFFSET ?";
+		
+		try (Connection con = connectionProvider.getConnection(); 
 				PreparedStatement countSt = con.prepareStatement(countSql);
 				PreparedStatement st = con.prepareStatement(sql)) {
 			String searchPattern = "%"+pattern+"%";
@@ -75,12 +75,12 @@ public class ProductDao {
 		return result;
 	}
 
-	public static RequestEntity getAll(int limit, int offset) throws UnsuccessfulRequestException {
+	public RequestEntity getAll(int limit, int offset) throws UnsuccessfulRequestException {
 		RequestEntity result = new RequestEntity();
-		String countSql = "SELECT COUNT(ID) FROM PRODUCTS";
-		String sql = "SELECT * FROM PRODUCTS LIMIT ? OFFSET ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
-		try (Connection con = cp.getConnection(); 
+		final String countSql = "SELECT COUNT(ID) FROM PRODUCTS WHERE DELETED = FALSE";
+		final String sql = "SELECT * FROM PRODUCTS WHERE DELETED = FALSE LIMIT ? OFFSET ?";
+		
+		try (Connection con = connectionProvider.getConnection(); 
 				PreparedStatement st = con.prepareStatement(sql);
 				PreparedStatement countSt = con.prepareStatement(countSql)) {
 			
@@ -95,7 +95,7 @@ public class ProductDao {
 		return result;
 	}
 
-	private static void createProductsList(RequestEntity result, PreparedStatement st, PreparedStatement countSt) throws SQLException {
+	private void createProductsList(RequestEntity result, PreparedStatement st, PreparedStatement countSt) throws SQLException {
 		try(ResultSet rs = countSt.executeQuery()){
 			if(!rs.next()) {
 				return;
@@ -125,11 +125,11 @@ public class ProductDao {
 		}
 	}
 
-	public static Product get(int productId) throws UnsuccessfulRequestException {
-		String sql = "SELECT * FROM PRODUCTS WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public Product get(int productId) throws UnsuccessfulRequestException {
+		final String sql = "SELECT * FROM PRODUCTS WHERE ID = ?";
+		
 		Product result = null;
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+		try (Connection con = connectionProvider.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
 			st.setInt(1, productId);
 			try (ResultSet rs = st.executeQuery()) {
 				if (!rs.next()) {
@@ -156,10 +156,10 @@ public class ProductDao {
 		return result;
 	}
 
-	public static void update(Product product) throws UnsuccessfulRequestException {
-		String sql = "UPDATE PRODUCTS SET NAME = ?, UNITS = ?, PRICE = ?, AMOUNT = ? WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+	public void update(Product product) throws UnsuccessfulRequestException {
+		final String sql = "UPDATE PRODUCTS SET NAME = ?, UNITS = ?, PRICE = ?, AMOUNT = ? WHERE ID = ?";
+		
+		try (Connection con = connectionProvider.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
 			int k = 0;
 			st.setString(++k, product.getName());
 			st.setInt(++k, product.getUnits().getId());
@@ -173,35 +173,32 @@ public class ProductDao {
 		}
 	}
 
-	public static void delete(Product product) throws UnsuccessfulRequestException {
-
-		String sql = "DELETE FROM PRODUCTS WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
-		try (Connection con = cp.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
-			st.setInt(1, product.getId());
-			st.execute();
+	public void delete(Product product) throws UnsuccessfulRequestException {
+		final String checkSql = "SELECT 1 FROM PRODUCTS p INNER JOIN CHEQUES_PRODUCTS cp ON p.ID = cp.PRODUCT_ID  WHERE p.ID = ? LIMIT 1";
+		final String markDeletedsql = "UPDATE PRODUCTS SET DELETED = TRUE WHERE ID = ?";
+		final String hardDeletesql = "DELETE FROM PRODUCTS WHERE ID = ?";
+		String sql;
+		try (Connection con = connectionProvider.getConnection();
+				PreparedStatement checkSt = con.prepareStatement(checkSql)) {
+			checkSt.setInt(1, product.getId());
+			try (ResultSet checkRs = checkSt.executeQuery()) {
+				if (checkRs.next()) {
+					sql = markDeletedsql;
+				} else {
+					sql = hardDeletesql;
+				}
+				
+				try(PreparedStatement st = con.prepareStatement(sql)){
+					st.setInt(1, product.getId());
+					int updatesCount = st.executeUpdate();
+					System.out.println("Records deleted:" + updatesCount);
+				}
+			}
+			
 		} catch (SQLException e) {
 			logger.error("Failed delete product", e);
 			throw new UnsuccessfulRequestException("Unsuccessfull 'delete' request", e.getCause());
 		}
-	}
-
-	public static int countRecords() throws UnsuccessfulRequestException {
-		int result = 0;
-		String sql = "SELECT COUNT * FROM PRODUCTS";
-		ConnectionPool cp = ConnectionPool.getInstance();
-		try (Connection con = cp.getConnection();
-				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery(sql)) {
-			if (!rs.next()) {
-				throw new UnsuccessfulRequestException("No products");
-			}
-			result = rs.getInt(1);
-		} catch (SQLException e) {
-			logger.error("Failed to count records", e);
-			throw new UnsuccessfulRequestException("Unsuccessfull 'countrecords' request", e.getCause());
-		}
-		return result;
 	}
 
 }

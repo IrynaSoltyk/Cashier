@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import com.cashier.RouteMapping;
 import com.cashier.models.Role;
-import com.cashier.models.RoutingEntity;
+import com.cashier.controllers.RoutingEntity;
 import com.cashier.models.User;
 
 @WebFilter("/*")

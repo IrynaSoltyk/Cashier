@@ -1,20 +1,23 @@
 package com.cashier.controllers;
 
 import java.lang.invoke.MethodHandles;
-//import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ProductDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
-import com.cashier.service.ProductService;
-//import com.cashier.models.Product;
-import com.cashier.models.RequestEntity;
+import com.cashier.dao.RequestEntity;
 
-public class ProductsGetAllController implements Controller {
+public class ProductsGetAllController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ProductsGetAllController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -35,15 +38,15 @@ public class ProductsGetAllController implements Controller {
 				pattern = request.getParameter("searchPattern");			
 			}
 
-			ProductService service = new ProductService();
+			ProductDao dao = new ProductDao(connectionProvider);
 			
 			if (request.getParameter("action") != null) {
 				action = request.getParameter("action");
 			}
 			if(action.equals("search")) {
-				objects = service.searchAllProducts(pattern, page-1, limit);
+				objects = dao.searchAllProducts(pattern, limit, (page-1)*limit);
 			} else {
-				objects = service.getAllProducts(page-1, limit);
+				objects = dao.getAll(limit, (page-1)*limit);
 			}
 			count = objects.getCount();
 			request.setAttribute("products", objects.getObjects());

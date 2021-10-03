@@ -21,21 +21,22 @@
     
 </head>
 <body>
-<div class="container-fluid bg-light">
+<div class=" row container-fluid bg-light">
 
-<div class="row">
 <div class="col11">
 	<!--  <p class="navbar-brand text-secondary">Cashier</p>-->
+	<form method="get">
+	
 	<c:if test="${not empty user}">
 	<div class="btn-group">
-	<form method="get">
   		<button formaction="productgetall" class="btn btn-outline-info btn-sm">Products</button>
+  		
   		<c:set var="matched" scope="page" value="false"/>
   		<c:forEach var="role" items="${user.roles}">
-  		<c:if test="${matched == 'false' && (role == 'CASHIER' || role == 'MANAGER')}">
-  			<button formaction="chequegetall" class="btn btn-outline-info btn-sm">Cheques</button> 
-  			<c:set var="matched" scope="page" value="true"/>
-  		</c:if>
+  			<c:if test="${matched == 'false' && (role == 'CASHIER' || role == 'MANAGER')}">
+  				<button formaction="chequegetall" class="btn btn-outline-info btn-sm">Cheques</button> 
+  				<c:set var="matched" scope="page" value="true"/>
+  			</c:if>
   		</c:forEach>
   		
   		<c:forEach var="role" items="${user.roles}">
@@ -45,30 +46,46 @@
   		</c:forEach>
   		
   		<button formaction="logout" class="btn btn-outline-info btn-sm">Logout</button>
+  	
+  	</div>
+  	</c:if>
   	</form>
-	</div>
-	</c:if>
+	
+	
 </div>
 
 
 
-	<div class=" navbar container col1  sticky-to justify-content-end">
+	<div class="row navbar container col1  sticky-to justify-content-end">
 		
-	<div class=row>
-				<div>
+			<div>
 			<span class="text-center text-secondary text-sm">
 			&nbsp; ${user.name} &nbsp;&nbsp;
 			</span>
-				</div>
-					<div class="nav-item">${lang!='en'?'<a class="nav-link" href="?sessionLocale=en">En</a>':'En'}
-					</div>
-					<div class="nav-item">
-  					 ${lang!='ua'?'<a class="nav-link" href="?sessionLocale=ua">Укр</a>':'Укр'} 
- 				 </div>
+			</div>
+			<div class="btn-group">
+			</div>
+			<div class="nav-item">
+			<c:url var="localeUrl" value="">
+					<c:forEach items="${param}" var="entry">
+							 <c:if test="${entry.key != 'sessionLocale'}">
+						 <c:param name="${entry.key}" value="${entry.value}" />
+						 </c:if>
+					 </c:forEach>
+				 <c:param name="sessionLocale" value="en" />
+			</c:url>
+			<a href="${localeUrl}">en</a>
+			<c:url var="localeUrl" value="">
+					<c:forEach items="${param}" var="entry">
+							 <c:if test="${entry.key != 'sessionLocale'}">
+						 <c:param name="${entry.key}" value="${entry.value}" />
+						 </c:if>
+					 </c:forEach>
+				 <c:param name="sessionLocale" value="ua" />
+			</c:url>
+			<a href="${localeUrl}">укр</a>
  			</div>
-		</div>
-</div>
- </div>
+	</div>
 
 </div>
 

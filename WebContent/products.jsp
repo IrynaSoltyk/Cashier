@@ -38,17 +38,7 @@
 
 <c:choose>
 	<c:when test="${not empty products}">
-		<div class=row">
-			<div class="col10">
-				<span class="badge">${count}</span> products in total
-			</div>
-
-			<div class="col2">
-				Show: <a href="${pageContext.request.queryString}">5</a>
-				|<a href="${pageContext.request.pathInfo}?${not empty param.page}?'page='+${param.page}:''}&limit=10">10</a>
-				|<a href="?limit=15">15</a>
-
-			</div>
+<%@ include file="fragments/limit.jspf"%>
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -126,25 +116,8 @@
 			search criteria</div>
 	</c:otherwise>
 </c:choose>
-<!-- PAGINATION -->
-<div class="container">
-	<table border="0" cellpadding="5" cellspacing="5">
-		<tr>
-			<c:if test="${pagesN>1}">
-				<c:forEach begin="1" end="${pagesN}" var="i">
-					<c:choose>
-						<c:when test="${pageN eq i}">
-							<td>${i}</td>
-						</c:when>
-						<c:otherwise>
-							<td><a href="productgetall?page=${i}&limit=${limit}">${i}</a></td>
-						</c:otherwise>
-					</c:choose>
-				</c:forEach>
-			</c:if>
-		</tr>
-	</table>
-</div>
+
+<%@ include file="fragments/pagination.jspf"%>
 
 <br>
 <br>

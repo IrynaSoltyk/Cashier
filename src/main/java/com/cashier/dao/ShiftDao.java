@@ -14,20 +14,21 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.cashier.exeptions.UnsuccessfulRequestException;
-import com.cashier.models.RequestEntity;
+import com.cashier.dao.RequestEntity;
 import com.cashier.models.Shift;
-import com.cashier.service.ConnectionPool;
 
 public class ShiftDao {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
-	
-	private ShiftDao() {}
-	
-	public static void create(Shift shift) throws UnsuccessfulRequestException {
-		String sql = "INSERT INTO SHIFTS (USER_ID, BEGIN_DATE) VALUES (?,?)";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	private final ConnectionProvider connectionProvider;
 
-		try (Connection con = cp.getConnection();
+	public ShiftDao(ConnectionProvider connectionProvider) {
+		this.connectionProvider = connectionProvider;
+	}
+	
+	public void create(Shift shift) throws UnsuccessfulRequestException {
+		final String sql = "INSERT INTO SHIFTS (USER_ID, BEGIN_DATE) VALUES (?,?)";
+		
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 		st.setInt(1, shift.getUserId());
 		st.setTimestamp(2, Timestamp.from(Instant.now()));
@@ -46,11 +47,10 @@ public class ShiftDao {
 	}
 	}
 	
-	public static void closeShift(int id) throws UnsuccessfulRequestException {
-		String sql = "UPDATE SHIFTS SET END_DATE = ? WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
-
-		try (Connection con = cp.getConnection();
+	public void closeShift(int id) throws UnsuccessfulRequestException {
+		final String sql = "UPDATE SHIFTS SET END_DATE = ? WHERE ID = ?";
+		
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql)) {
 			
 			int k = 0;
@@ -64,13 +64,12 @@ public class ShiftDao {
 	}
 	}
 	
-	public static Shift getShift(int id) throws UnsuccessfulRequestException {
+	public Shift getShift(int id) throws UnsuccessfulRequestException {
 		Shift result = new Shift();
 		result.setId(id);
-		String sql = "SELECT * FROM SHIFTS WHERE ID = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+		final String sql = "SELECT * FROM SHIFTS WHERE ID = ?";
 
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				PreparedStatement st = con.prepareStatement(sql)) {
 			st.setInt(1, id);
 			try (ResultSet rs = st.executeQuery()) {
@@ -79,11 +78,12 @@ public class ShiftDao {
 				}
 				
 				Instant beginDate = rs.getTimestamp("BEGIN_DATE").toInstant();
-				Instant endDate = rs.getTimestamp("END_DATE").toInstant();
-				int userId = rs.getInt("USER_ID");
-				
 				result.setBeginDate(beginDate);
+				int userId = rs.getInt("USER_ID");
 				result.setUserId(userId);
+				Timestamp ts = rs.getTimestamp("END_DATE");
+				Instant endDate = ts!= null? ts.toInstant():null;
+
 				if (endDate != null) {
 				result.setEndDate(endDate);	
 				}
@@ -96,15 +96,14 @@ public class ShiftDao {
 		return result;
 	}
 
-	public static RequestEntity getAllShifts(int limit , int offset) throws UnsuccessfulRequestException {
+	public RequestEntity getAllShifts(int limit , int offset) throws UnsuccessfulRequestException {
 		RequestEntity result = new RequestEntity();
 		List<Shift> objects = new ArrayList<>();
 		
-		String countSql =  "SELECT COUNT(ID) FROM SHIFTS";
-		String sql = "SELECT * FROM SHIFTS ORDER BY BEGIN_DATE DESC LIMIT ? OFFSET ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
+		final String countSql =  "SELECT COUNT(ID) FROM SHIFTS";
+		final String sql = "SELECT * FROM SHIFTS ORDER BY BEGIN_DATE DESC LIMIT ? OFFSET ?";
 
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				Statement countSt = con.createStatement();
 				PreparedStatement st = con.prepareStatement(sql)) {
 				
@@ -124,15 +123,13 @@ public class ShiftDao {
 					Shift shift = new Shift();			
 					int id = rs.getInt("ID");
 					Instant beginDate = rs.getTimestamp("BEGIN_DATE").toInstant();
-					Instant endDate = null;
-					if(rs.getTimestamp("END_DATE")!= null) {
-						endDate = rs.getTimestamp("END_DATE").toInstant();
-					}
-					int userId = rs.getInt("USER_ID");
-					
 					shift.setId(id);
 					shift.setBeginDate(beginDate);
+					int userId = rs.getInt("USER_ID");
 					shift.setUserId(userId);
+					Timestamp ts = rs.getTimestamp("END_DATE");
+					Instant endDate = ts!= null? ts.toInstant():null;
+	
 					if (endDate != null) {
 						shift.setEndDate(endDate);	
 					}
@@ -148,11 +145,10 @@ public class ShiftDao {
 		return result;
 	}
 	
-	public static int getCurrentShiftId() throws UnsuccessfulRequestException {
-		String sql = "SELECT ID FROM SHIFTS WHERE END_DATE IS NULL";
-		ConnectionPool cp = ConnectionPool.getInstance();
+	public int getCurrentShiftId() throws UnsuccessfulRequestException {
+		final String sql = "SELECT ID FROM SHIFTS WHERE END_DATE IS NULL";
 
-		try (Connection con = cp.getConnection();
+		try (Connection con = connectionProvider.getConnection();
 				Statement st = con.createStatement();
 				ResultSet rs = st.executeQuery(sql)) {
 			if(!rs.next()) {

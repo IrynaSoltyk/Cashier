@@ -10,15 +10,24 @@
 							<td>${i}</td>
 						</c:when>
 						<c:otherwise>
-							<td><a
-								href="?page=${i}&limit=${limit}<c:if test="not empty param.chequeId">
-                        &${param.chequeId}
-                        </c:if>
-                        ">${i}</a></td>
+							<td>
+								<!-- <a href="productgetall?page=${i}&limit=${limit}">${i}</a> -->
+								<c:url var="nextUrl" value="">
+								    <c:forEach items="${param}" var="entry">
+								        <c:if test="${entry.key != 'page'}">
+								            <c:param name="${entry.key}" value="${entry.value}" />
+								        </c:if>
+								    </c:forEach>
+								    <c:param name="page" value="${i}" />
+								</c:url>
+								<a href="${nextUrl}">${i}</a>
+							</td>
 						</c:otherwise>
 					</c:choose>
 				</c:forEach>
 			</c:if>
 		</tr>
 	</table>
+	
+	
 </div>

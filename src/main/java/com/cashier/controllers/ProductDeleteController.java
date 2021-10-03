@@ -7,14 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ProductDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Product;
-import com.cashier.service.ProductService;
 
-
-
-public class ProductDeleteController implements Controller{
+public class ProductDeleteController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ProductDeleteController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -26,8 +29,11 @@ public class ProductDeleteController implements Controller{
 			if (id > 0) {
 				Product product = new Product();
 				product.setId(id);
-				ProductService service = new ProductService();
-				service.deleteProduct(product);
+				
+				ProductDao dao = new ProductDao(connectionProvider);
+				
+				dao.delete(product);
+				
 				request.getSession().setAttribute("successMsg", "the product has been succesfully deleted");
 				
 			} else

@@ -11,21 +11,24 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.cashier.models.User;
-import com.cashier.service.ConnectionPool;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Role;
 
 public class UserDao {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	private final ConnectionProvider connectionProvider;
 
-	public static User getUser(String inputLogin) throws UnsuccessfulRequestException {
-		String sql = "SELECT u.ID, u.NAME, u.LOGIN, u.PASSWORD, r.ROLE FROM USERS AS u "
+	public UserDao(ConnectionProvider connectionProvider) {
+		this.connectionProvider = connectionProvider;
+	}
+
+	public User getUser(String inputLogin) throws UnsuccessfulRequestException {
+		final String sql = "SELECT u.ID, u.NAME, u.LOGIN, u.PASSWORD, r.ROLE FROM USERS AS u "
 				+ "LEFT JOIN ROLES as r ON u.ID = r.USER_ID "
 				+ "WHERE u.LOGIN = ?";
-		ConnectionPool cp = ConnectionPool.getInstance();
 		User result = new User();
 		List<Role> roles = null;
-		try (Connection con = cp.getConnection(); 
+		try (Connection con = connectionProvider.getConnection(); 
 				PreparedStatement st = con.prepareStatement(sql)) {
 			st.setString(1, inputLogin);
 			try (ResultSet rs = st.executeQuery()) {

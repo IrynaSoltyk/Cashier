@@ -7,18 +7,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ChequeProductDao;
+import com.cashier.dao.ConnectionProvider;
 import com.cashier.exeptions.UnsuccessfulRequestException;
+import com.cashier.exeptions.UserMessageException;
 import com.cashier.models.Cheque;
 import com.cashier.models.ChequeProduct;
-import com.cashier.service.ChequeProductService;
-import com.cashier.service.ChequeService;
 
-public class ChequeProductEditController implements Controller {
+public class ChequeProductEditController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ChequeProductEditController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
-		// String action="";
 		Cheque cheque = null;
 		int cpId = -1;
 		int amount = -1;
@@ -42,18 +47,20 @@ public class ChequeProductEditController implements Controller {
 				ChequeProduct cp = new ChequeProduct();
 				cp.setId(cpId);
 				cp.setAmount(amount);
-				ChequeProductService cpService = new ChequeProductService();
-				cpService.updateProductInCheque(cp);
+				ChequeProductDao cpDao = new ChequeProductDao(connectionProvider);
+				cpDao.updateProduct(cp);
 			} else
 				throw new UnsuccessfulRequestException("Wrong parameters");
-			ChequeService service = new ChequeService();
-			cheque = service.get(chequeId);
-			request.setAttribute("cheque", cheque);
-			request.setAttribute("action", "edit");
+			ChequeDao dao = new ChequeDao(connectionProvider);
+			cheque = dao.get(chequeId);
+			//request.setAttribute("cheque", cheque);
+			//request.setAttribute("action", "edit");
 
 		} catch (UnsuccessfulRequestException e) {
 			logger.error("Failed adding/editing product", e);
 			request.getSession().setAttribute("errorMsg", "There was a problem adding/ editing product");
+		} catch (UserMessageException e) {
+			request.getSession().setAttribute("errorMsg", e);
 		}
 		return new RedirectControllerResponse("chequeedit?chequeId="+cheque.getId());
 	}

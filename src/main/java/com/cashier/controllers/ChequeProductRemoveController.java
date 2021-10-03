@@ -7,18 +7,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ChequeDao;
+import com.cashier.dao.ChequeProductDao;
+import com.cashier.dao.ConnectionProvider;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Cheque;
-import com.cashier.service.ChequeProductService;
-import com.cashier.service.ChequeService;
 
-public class ChequeProductRemoveController implements Controller {
+
+public class ChequeProductRemoveController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
 	
+	public ChequeProductRemoveController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
+
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
 		int cpId = -1;
-		int amount = -1;
 		int chequeId = -1;
 		Cheque cheque = null;
 		if (request.getParameter("cpId") != null) {
@@ -29,13 +34,14 @@ public class ChequeProductRemoveController implements Controller {
 			chequeId = Integer.parseInt(request.getParameter("chequeId"));
 		}
 		try {
-			logger.info(cpId+"|"+amount+"|"+chequeId);
 			if( cpId > 0 ) {
-				ChequeProductService cpService = new ChequeProductService();
-				cpService.deleteProductFromCheque(cpId);
+				ChequeProductDao cpDao = new ChequeProductDao(connectionProvider);
+				
+				cpDao.deleteProduct(cpId);
+				
 			} else throw new UnsuccessfulRequestException("Wrong parameters");
-				ChequeService service = new ChequeService();
-				cheque = service.get(chequeId);
+				ChequeDao dao = new ChequeDao(connectionProvider);
+				cheque = dao.get(chequeId);
 				//request.setAttribute("cheque", cheque);
 				//request.setAttribute("action", "edit");
 			

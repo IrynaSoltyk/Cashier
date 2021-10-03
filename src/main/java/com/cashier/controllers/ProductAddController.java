@@ -8,13 +8,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ProductDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Product;
 import com.cashier.models.Units;
-import com.cashier.service.ProductService;
 
-public class ProductAddController implements Controller{
+public class ProductAddController extends ControllerBase {
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
+	
+	public ProductAddController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
 
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
@@ -24,8 +29,8 @@ public class ProductAddController implements Controller{
 		product.setAmount( Integer.parseInt(request.getParameter("amount")));
 		product.setUnits(Units.valueOf(request.getParameter("units")));
 		try {
-			ProductService service = new ProductService();
-			service.createProduct(product);
+			ProductDao dao = new ProductDao(connectionProvider);
+			dao.create(product);
 			request.getSession().setAttribute("successMsg", "New product has been successfully added");
 			
 		} catch (UnsuccessfulRequestException e) {

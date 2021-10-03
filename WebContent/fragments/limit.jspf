@@ -1,0 +1,30 @@
+<div class=row">
+			<div class="col10">
+				<span class="badge">${count}</span> in total
+			</div>
+
+			<div class="col2">
+				Show:
+<c:url var="nextUrl" value="">
+	<c:forEach items="${param}" var="entry">
+		<c:if test="${entry.key != 'limit' && entry.key != 'page'} ">
+			<c:param name="${entry.key}" value="${entry.value}" />
+		</c:if>
+	</c:forEach>
+	<c:param name="limit" value="5" />
+	</c:url>
+	<a href="${nextUrl}">5</a>
+
+
+<c:url var="nextUrl" value="">
+	<c:forEach items="${param}" var="entry">
+		<c:if test="${entry.key != 'limit' && entry.key != 'page'}">
+			<c:param name="${entry.key}" value="${entry.value}" />
+		</c:if>
+	</c:forEach>
+	<c:param name="limit" value="10" />
+	</c:url>
+	<a href="${nextUrl}">10</a>
+
+</div>
+</div>

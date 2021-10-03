@@ -8,6 +8,7 @@ public class Product {
 	private Units units;
 	private BigDecimal price;
 	private int amount;
+	private boolean deleted;
 
 	public int getId() {
 		return id;
@@ -38,7 +39,7 @@ public class Product {
 	}
 
 	public void setPrice(BigDecimal price) {
-		this.price = price;
+		this.price = new BigDecimal(price.unscaledValue(), 2);
 	}
 
 	public void setUnits(Units units) {
@@ -47,6 +48,14 @@ public class Product {
 
 	public void setAmount(int amount) {
 		this.amount = amount;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 }

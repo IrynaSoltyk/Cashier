@@ -12,6 +12,7 @@ public class Cheque {
 	private List<ChequeProduct> products;
 	private Instant cancelledDate;
 	private User cancelledBy;
+	private int cancelled_shift_id;
 
 	public int getId() {
 		return id;
@@ -72,5 +73,13 @@ public class Cheque {
 	
 	public BigDecimal getCost() {
 		return products.stream().map(a -> a.getTotalPrice()).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+	}
+
+	public int getCancelled_shift_id() {
+		return cancelled_shift_id;
+	}
+
+	public void setCancelled_shift_id(int cancelled_shift_id) {
+		this.cancelled_shift_id = cancelled_shift_id;
 	}
 }

@@ -7,17 +7,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ShiftDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
-import com.cashier.models.RequestEntity;
-import com.cashier.service.ShiftService;
+import com.cashier.dao.RequestEntity;
 
-public class ShiftGetAllController implements Controller{
+public class ShiftGetAllController extends ControllerBase{
 	private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
 	
+	public ShiftGetAllController(ConnectionProvider connectionProvider) {
+		super(connectionProvider);
+	}
+
 	@Override
 	public ControllerResponse process(HttpServletRequest request, HttpServletResponse response) {
 		RequestEntity re = null;
-		ShiftService service = new ShiftService();
+		ShiftDao dao = new ShiftDao(connectionProvider);
 		int page = 1;
 		int limit = 5;
 		try {
@@ -28,11 +33,12 @@ public class ShiftGetAllController implements Controller{
 				limit = Integer.parseInt(request.getParameter("limit"));
 			}
 			
-			int openShiftId = service.getCurrentShiftId();
+			int openShiftId = dao.getCurrentShiftId();
+			
 			if (openShiftId > 0) {
 				request.setAttribute("shiftId", openShiftId);
 			}
-			re = service.getAllShifts(page-1, limit);
+			re = dao.getAllShifts(limit, (page-1) * limit);
 
 			int count = re.getCount();
 			request.setAttribute("shifts", re.getObjects());
