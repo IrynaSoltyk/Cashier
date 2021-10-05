@@ -385,12 +385,12 @@ public class ChequeDao {
 	}
 
 	public void cancelCheque(Cheque cheque) throws UnsuccessfulRequestException {
-		final String sql = "UPDATE CHEQUES SET CANCELLED_DATE = ?, CANCELLED_BY = ? WHERE ID = ?";
+		final String sql = "UPDATE CHEQUES SET CANCELLED_DATE = ?, CANCELLED_BY = ?, CANCELLED_SHIFT_ID=? WHERE ID = ?";
 
-//		final String changeSql = "UPDATE PRODUCTS AS p INNER JOIN CHEQUES_PRODUCTS AS cp ON cp.PRODUCT_ID = p.ID "
-//				+ "set p.AMOUNT = p.AMOUNT + cp.AMOUNT WHERE cp. CHEQUE_ID = ?";
+		final String changeSql = "UPDATE PRODUCTS AS p INNER JOIN CHEQUES_PRODUCTS AS cp ON cp.PRODUCT_ID = p.ID "
+				+ "set p.AMOUNT = p.AMOUNT + cp.AMOUNT WHERE cp.CHEQUE_ID = ?";
 		
-		final String changeSql = "update products p set p.amount = (select p.amount + cp.amount from cheques_products cp where cp.product_id = p.id and cp.cheque_id = ?)"; 
+		//final String changeSql = "update products p set p.amount = (select p.amount + cp.amount from cheques_products cp where cp.product_id = p.id and cp.cheque_id = ?)"; 
 		
 		synchronized (ProductsLock.class) {
 			try (Connection con = connectionProvider.getConnection()) {
@@ -403,6 +403,7 @@ public class ChequeDao {
 					k = 0;
 					st.setTimestamp(++k, Timestamp.from(Instant.now()));
 					st.setInt(++k, cheque.getCancelledBy().getUserId());
+					st.setInt(++k, cheque.getCancelled_shift_id());
 					st.setInt(++k, cheque.getId());
 
 					con.setAutoCommit(false);

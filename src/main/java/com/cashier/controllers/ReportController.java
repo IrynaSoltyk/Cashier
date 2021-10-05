@@ -11,9 +11,11 @@ import org.apache.log4j.Logger;
 
 import com.cashier.dao.ChequeDao;
 import com.cashier.dao.ConnectionProvider;
+import com.cashier.dao.ReportDao;
 import com.cashier.exeptions.UnsuccessfulRequestException;
 import com.cashier.models.Cheque;
 import com.cashier.models.Report;
+import com.cashier.models.ReportInfo;
 import com.cashier.dao.RequestEntity;
 
 public class ReportController extends ControllerBase {
@@ -34,9 +36,32 @@ public class ReportController extends ControllerBase {
 			type = request.getParameter("type");
 		}
 		try {
-			ChequeDao dao = new ChequeDao(connectionProvider);
-			RequestEntity re = dao.getAllInShift(shiftId);
+			ReportDao dao = new ReportDao(connectionProvider);
+			Report reportFromDb = dao.create(shiftId);
 			int cancelled = 0;
+			int closed = 0;
+			BigDecimal cancelledCost = BigDecimal.ZERO;
+			BigDecimal closedCost = BigDecimal.ZERO;
+			for (Cheque c : reportFromDb.getClosed()) {
+				//collectInfo(closed, c, closedCost);
+				closed++;
+				closedCost = closedCost.add(c.getCost());
+			}
+			for (Cheque c : reportFromDb.getCancelled()) {
+				//collectInfo(cancelled, c, cancelledCost);
+				cancelled++;
+				cancelledCost = cancelledCost.add(c.getCost());
+			}
+			
+			ReportInfo report = new ReportInfo();
+			report.setShiftId(shiftId);
+			report.setClosed(closed);
+			report.setCancelled(cancelled);
+			report.setCancelledCost(cancelledCost);
+			report.setClosedCost(closedCost);
+			
+			//System.out.println(closed+" "+closedCost+" "+cancelled+" " +cancelledCost);
+			/*int cancelled = 0;
 			int closed = 0;
 			BigDecimal cancelledCost = BigDecimal.ZERO;
 			BigDecimal closedCost = BigDecimal.ZERO;
@@ -57,7 +82,7 @@ public class ReportController extends ControllerBase {
 			report.setCancelled(cancelled);
 			report.setCancelledCost(cancelledCost);
 			report.setClosedCost(closedCost);
-			
+			*/
 			request.setAttribute("report", report);
 			request.setAttribute("type", type);
 			request.setAttribute("shiftId", shiftId);
@@ -67,5 +92,11 @@ public class ReportController extends ControllerBase {
 			return new RedirectControllerResponse("shiftgetall");
 		}
 		return new ForwardControllerResponse("report.jsp");
+	}
+
+	private void collectInfo(Integer count, Cheque c, BigDecimal total) {
+		count++;
+		total = total.add(c.getCost());
+		
 	}
 }

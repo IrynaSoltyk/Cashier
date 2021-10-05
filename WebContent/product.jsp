@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
+<c:set var="page" scope="page" value="product"/>
 <%@ include file="fragments/header.jspf"%>
 <body>
 	<div class="container">
@@ -13,13 +13,14 @@
 
 			<input type="hidden" id="action" name="action" value="${action}" /> <input
 				type="hidden" id="id" name="id" value="${product.id}" />
-			<h2>Product &nbsp;&nbsp;${product.id}</h2>
+			<h2><fmt:message key="product.title"/> &nbsp;&nbsp;${product.id}</h2>
 			
 			<%@ include file="fragments/messages.jspf"%>
 
 			<div class="form-group col-xs-4">
 				<label for="name" class="control-label col-xs-4"><fmt:message
-						key="product.label.name" />:</label> <input type="text" name="name"
+						key="product.label.name" />:</label> 
+						<input type="text" name="name"
 					id="name" class="form-control" value="${product.name}"
 					required="true" /> <label for="price"
 					class="control-label col-xs-4"><fmt:message
@@ -34,15 +35,13 @@
 						key="product.label.units" />:</label> <select name="units" id="units"
 					class="form-control" required="true">
 					<option value="KG"
-						${product.units=='KG'? 'selected="selected"' : ''}>kg</option>
+						${product.units=='KG'? 'selected="selected"' : ''}><fmt:message key="app.units.kg"/></option>
 					<option value="LITRE"
-						${product.units=='LITRE'? 'selected="selected"' : ''}>
-						litre</option>
+						${product.units=='LITRE'? 'selected="selected"' : ''}><fmt:message key="app.units.litre"/></option>
 					<option value="PIECE"
-						${product.units == 'PIECE'? 'selected="selected"' : ''}>
-						piece</option>
+						${product.units == 'PIECE'? 'selected="selected"' : ''}><fmt:message key="app.units.piece"/></option>
 				</select> <br></br>
-				<button type="submit" class="btn btn-primary  btn-md">${action=="edit"?'Accept':'Add'}</button>
+				<button type="submit" class="btn btn-primary  btn-md"><fmt:message key="product.button.label.${action=='edit'?'accept':'add'}"/></button>
 			</div>
 		</form>
 	</div>

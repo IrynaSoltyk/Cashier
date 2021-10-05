@@ -18,6 +18,7 @@ import com.cashier.controllers.ChequeProductEditController;
 import com.cashier.controllers.ChequeProductRemoveController;
 import com.cashier.controllers.LoginController;
 import com.cashier.controllers.LogoutController;
+import com.cashier.controllers.NotFoundController;
 import com.cashier.controllers.ProductAddController;
 import com.cashier.controllers.ProductDeleteController;
 import com.cashier.controllers.ProductEditController;
@@ -165,6 +166,12 @@ public class RouteMapping {
 		routingEntity.setRequiredRoles(Role.CASHIER, Role.CASHIER, Role.COMMODITY_EXPERT);
 		routingEntity.setUrlPattern("logout");
 		routingEntity.setControllerClass(LogoutController.class);
+		routingEntities.add(routingEntity);
+		
+		routingEntity = new RoutingEntity();
+		routingEntity.setRequiredRoles(Role.CASHIER, Role.CASHIER, Role.COMMODITY_EXPERT);
+		routingEntity.setUrlPattern("");
+		routingEntity.setControllerClass(NotFoundController.class);
 		routingEntities.add(routingEntity);
 
 	}

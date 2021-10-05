@@ -18,7 +18,9 @@ import com.cashier.RouteMapping;
 import com.cashier.models.Role;
 import com.cashier.controllers.RoutingEntity;
 import com.cashier.models.User;
-
+/**
+ * Servlet Filter implementation class AuthorizationFilter
+ */
 @WebFilter("/*")
 public class AuthorizationFilter implements Filter {
 	private static User getLoggedInUser(HttpServletRequest request) {

@@ -27,7 +27,7 @@ public class ChequeCancelController extends ControllerBase {
 		if (request.getParameter("chequeId") != null) {
 			chequeId = Integer.parseInt(request.getParameter("chequeId"));
 		}
-
+		System.out.println("cancelling cheque N "+ chequeId);
 		ChequeDao dao = new ChequeDao(connectionProvider);
 		try {
 			Cheque cheque = new Cheque();
@@ -39,6 +39,7 @@ public class ChequeCancelController extends ControllerBase {
 			// get id of current shift
 			int openShiftId = shiftDao.getCurrentShiftId();
 			if (openShiftId > 0) {
+			
 				cheque.setCancelled_shift_id(openShiftId);
 				
 				dao.cancelCheque(cheque);
@@ -46,7 +47,7 @@ public class ChequeCancelController extends ControllerBase {
 				request.getSession().setAttribute("successMsg", "Cheque has been successfully canceled");
 				return new RedirectControllerResponse("chequegetall");
 			} else {
-				request.getSession().setAttribute("errorMsg", "No open shifts available. You can cancell shift only with open shift");
+				request.getSession().setAttribute("errorMsg", "No open shifts available. You can cancell shift only in open shift");
 				return new RedirectControllerResponse("chequegetall");
 			}
 		} catch (UnsuccessfulRequestException e) {

@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<c:set var="page" scope="page" value="unathorized"/>
 <meta charset="ISO-8859-1">
 <title>Unathorized</title>
 </head>

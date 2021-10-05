@@ -1,10 +1,10 @@
 <div class=row">
 			<div class="col10">
-				<span class="badge">${count}</span> in total
+				<span class="badge">${count}</span> <fmt:message key="app.intotal"/>
 			</div>
 
 			<div class="col2">
-				Show:
+				<fmt:message key="app.show"/>
 <c:url var="nextUrl" value="">
 	<c:forEach items="${param}" var="entry">
 		<c:if test="${entry.key != 'limit' && entry.key != 'page'} ">

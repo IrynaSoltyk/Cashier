@@ -1,12 +1,6 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
-
-
-<c:set var="page" scope="page" value="Login" />
 <%@ include file="fragments/header.jspf"%>
 
+<c:set var="page" scope="page" value="login" />
 
 <div class="container">
 	<h2>

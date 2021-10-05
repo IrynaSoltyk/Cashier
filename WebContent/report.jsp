@@ -1,44 +1,58 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<c:set var="page" scope="page" value="report"/>
 
-<c:set var="page" scope="page" value="cheques" />
 <%@ include file="fragments/header.jspf"%>
+	<script>
+		function printDiv(divName){
+			var printContents = document.getElementById(divName).innerHTML;
+			var originalContents = document.body.innerHTML;
+
+			document.body.innerHTML = printContents;
+			window.print();
+			document.body.innerHTML = originalContents;
+
+		}
+	</script>
+<div  id="toprint">
 <div class="container">
-	<h2>${param.type}&nbsp;Report</h2>
+	<h2>${param.type}&nbsp;<fmt:message key="report.title"/></h2>
+
 	<%@ include file="fragments/messages.jspf"%>
 </div>
 
-<div class="container">
-	Shift # ${shiftId}
+<div class="container"  id="toprint">
+	<fmt:message key="report.text.shift"/> # ${shiftId}
 	${user.name}
 	<table class="table">
 		<tr class="active">
-			<td colspan="2"><h5>Sell</h5></td>
+			<td colspan="2"><h5><fmt:message key="report.text.sell"/></h5></td>
 		</tr>
 		<tr>
-			<td>Overall cheques</td>
-			<td>${report.closed}&nbsp;cheques</td>
+			<td><fmt:message key="report.text.overall"/> <fmt:message key="report.text.cheques"/></td>
+			<td>${report.closed}&nbsp;<fmt:message key="report.text.cheques"/></td>
 		</tr>
 		<tr>
-			<td>Overall sum</td>
-			<td>${report.closedCost}&nbsp; grn.</td>
+			<td><fmt:message key="report.text.overall"/> <fmt:message key="report.text.sum"/></td>
+			<td>${report.closedCost}&nbsp; <fmt:message key="app.currency"/></td>
 		</tr>
 		<tr  class="active" >
-			<td colspan="2"><h5>Return</h5></td>
+			<td colspan="2"><h5><fmt:message key="report.text.return"/></h5></td>
 		</tr>
 		<tr>
-			<td>Overall cancelled</td>
-			<td>${report.cancelled}&nbsp;cheques</td>
+			<td><fmt:message key="report.text.overall"/> <fmt:message key="report.text.cancelled"/></td>
+			<td>${report.cancelled}&nbsp;<fmt:message key="report.text.cheques"/></td>
 		</tr>
 		<tr>
-			<td>Overall sum</td>
-			<td>${report.cancelledCost}&nbsp;grn.</td>
+			<td><fmt:message key="report.text.overall"/> <fmt:message key="report.text.sum"/></td>
+			<td>${report.cancelledCost}&nbsp;<fmt:message key="app.currency"/></td>
 		</tr>
 	</table>
 </div>
+</div>
 <div class="container">
-<button onclick="window.print();" class="btn btn-info">Print report</button>
+<button onclick="printDiv('toprint');" class="btn btn-info"><fmt:message key="repotr.button.label.print"/></button>
 </div>
 
 <%@ include file="fragments/footer.jspf"%>

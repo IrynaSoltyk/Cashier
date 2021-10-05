@@ -2,10 +2,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
-<c:set var="page" scope="page" value="product" />
+<c:set var="page" scope="page" value="shifts" />
 <%@ include file="fragments/header.jspf"%>
 <div class="container">
-	<h2>Shifts</h2>
+	<h2><fmt:message key="shifts.title"/></h2>
 <%@ include file="fragments/messages.jspf"%>
 </div>
 <div>
@@ -15,9 +15,9 @@
 			<table class="table table-striped">
 				<thead>
 					<tr>
-						<td>shift id</td>
-						<td>begin date</td>
-						<td>end date</td>
+						<td><fmt:message key="shifts.table.label.shiftid"/></td>
+						<td><fmt:message key="shifts.table.label.begindate"/></td>
+						<td><fmt:message key="shifts.table.label.enddate"/></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -39,9 +39,9 @@
 										value="${shift.id}"> <input type="hidden" id="type"
 										name="type" value="X">
 									<td><button type="submit" formaction="shiftclose"
-											class="btn btn-primary btn-md">Close</button></td>
+											class="btn btn-primary btn-md"><fmt:message key="shifts.button.label.close"/></button></td>
 									<td><button type="submit" formaction="report"
-											class="btn btn-primary  btn-md">Form Xreport</button></td>
+											class="btn btn-primary  btn-md"><fmt:message key="shifts.button.label.xreport"/></button></td>
 								</form>
 							</c:when>
 							<c:otherwise>
@@ -52,7 +52,7 @@
 										name="type" value="Z">
 								<td></td>
 								<td><button type="submit" formaction="report"
-										class="btn btn-primary btn-sm">Show Z report</button></td>
+										class="btn btn-primary btn-sm"><fmt:message key="shifts.button.label.zreport"/></button></td>
 								</form>
 							</c:otherwise>
 						</c:choose>
@@ -63,7 +63,7 @@
 		</c:when>
 		<c:otherwise>
 			<br>
-			<div class="alert alert-info">No shifts yet</div>
+			<div class="alert alert-info"><fmt:message key="shifts.text.noshifts"/></div>
 		</c:otherwise>
 	</c:choose>
 </div>
@@ -78,7 +78,7 @@
 		<c:when test="${empty shiftId}">
 		<form method="get" id="shift" role="form">
 			<button type="submit" formaction="shiftopen"
-				class="btn btn-primary  btn-md">Start new shift</button>
+				class="btn btn-primary  btn-md"><fmt:message key="shifts.button.label.new"/></button>
 				</form>
 		</c:when>
 		<c:otherwise>
@@ -86,9 +86,9 @@
 				<input type="hidden" id="shiftId" name="shiftId" value=${shift.id}>
 				<input type="hidden" id="type" name="type" value="X">
 				<button type="submit" formaction="shiftclose"
-					class="btn btn-primary  btn-md">Close current shift</button>
+					class="btn btn-primary  btn-md"><fmt:message key="shifts.button.label.close"/></button>
 				<button type="submit" formaction="report"
-					class="btn btn-primary  btn-md">Form Xreport</button>
+					class="btn btn-primary  btn-md"><fmt:message key="shifts.button.label.xreport"/></button>
 			</form>
 		</c:otherwise>
 	</c:choose>

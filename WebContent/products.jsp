@@ -1,11 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<% request.setCharacterEncoding("UTF-8"); %>
 
-<c:set var="page" scope="page" value="product" />
+<c:set var="page" scope="page" value="products" />
 <%@ include file="fragments/header.jspf"%>
 <div class="container">
-	<h2>Products ${param.action}</h2>
+	<h2><fmt:message key="products.title"/> <fmt:message key="products.text.${not empty param.action? param.action : 'emptystr'}"/></h2>
 
 	<!--Search Form -->
 
@@ -19,11 +20,11 @@
 			<input type="hidden" id="action" name="action" value="search" /> <input
 				type="text" name="searchPattern" id="searchPattern"
 				class="form-control" required="true"
-				placeholder="Type the product name or id" />
+				placeholder="<fmt:message key='products.label.search.input.placeholder'/>" />
 
 			<div class="input-group-btn">
 				<button type="submit" class="btn btn-info">
-					<span class="glyphicon glyphicon-search"></span> Search
+					<span class="glyphicon glyphicon-search"></span><fmt:message key="products.button.label.search"/>
 				</button>
 			</div>
 			<br></br>
@@ -59,7 +60,7 @@
 					<tr class="${classProducts}">
 						<td>${product.id}</td>
 						<td>${product.name}</td>
-						<td>${product.price}</td>
+						<td>${product.price} <fmt:message key="app.currency"/></td>
 						<td>${product.amount}&nbsp;${product.units}</td>
 						<td>
 							<!-- if user role = cashier --> <c:forEach var="role"
@@ -68,14 +69,11 @@
 									<c:when test="${role=='CASHIER' && not empty param.chequeId}">
 										<form>
 											<div class="input-group input-group-sm">
-												<input type="hidden" id="productId" name="productId"
-													value=${product.id}> <input type="hidden"
-													id="chequeId" name="chequeId" value=${param.chequeId}>
-												<input type="number" class="form-control" name="amount"
-													placeholder="put in amount" max="${product.amount}" min="1">
+												<input type="hidden" id="productId" name="productId" value=${product.id}> 
+												<input type="hidden" id="chequeId" name="chequeId" value=${param.chequeId}>
+												<input type="number" class="form-control" name="amount"	placeholder="<fmt:message key='products.label.addtocheque.placeholder'/>" max="${product.amount}" min="1">
 												<div class="input-group-btn">
-													<button type="submit" formaction="chequeproductadd"
-														class="btn btn-primary btn-sm">Add to cheque</button>
+													<button type="submit" formaction="chequeproductadd"	class="btn btn-primary btn-sm"><fmt:message key="products.button.label.addtocheque"/></button>
 												</div>
 											</div>
 										</form>
@@ -90,12 +88,12 @@
 									<td>
 										<form method="get" id="product" role="form">
 										<input type="hidden" id="productId" name="productId" value=${product.id}>
- 										<button type="submit" formaction="productgetone" class="btn btn-primary btn-sm">Edit</button></td>
+ 										<button type="submit" formaction="productgetone" class="btn btn-primary btn-sm"><fmt:message key="products.button.label.edit"/></button></td>
 										</form>
 									<td>
 										<form method="post" id="product" role="form" class=>
 										<input type="hidden" id="productId" name="productId" value=${product.id}>
-										<button tye="submit" formaction="productdelete" class="btn btn-primary btn-sm">Delete</button>
+										<button tye="submit" formaction="productdelete" class="btn btn-primary btn-sm"><fmt:message key="products.button.label.delete"/></button>
 									</form>
 									</td>
 								</c:when>
@@ -112,8 +110,7 @@
 	<c:otherwise>
 		<br>
 		</br>
-		<div class="alert alert-info">No products found matching your
-			search criteria</div>
+		<div class="alert alert-info"><fmt:message key="products.text.noproductsfound" /></div>
 	</c:otherwise>
 </c:choose>
 
@@ -126,7 +123,7 @@
 <td>
 <c:if test="${not empty param.searchPattern}">
 <form method="post" action="productgetall">
-	<button type="submit" class="btn btn-primary  btn-md">Go back to product list</button>
+	<button type="submit" class="btn btn-primary  btn-md"><fmt:message key="products.button.label.gobacktoproductlist"/></button>
 </form>
 </c:if>
 </td>
@@ -136,7 +133,7 @@
 		<c:when test="${role=='COMMODITY_EXPERT'}">
 			<div class="container">
 				<form method="post" action="productnew">
-					<button type="submit" class="btn btn-primary  btn-md">Add new product</button>
+					<button type="submit" class="btn btn-primary  btn-md"><fmt:message key="products.button.label.addnewproduct"/></button>
 				</form>
 			</div>
 		</c:when>

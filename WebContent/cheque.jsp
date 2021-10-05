@@ -1,15 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
+<c:set var="page" scope="page" value="cheque N ${cheque.id}"/>
 <%@ include file="fragments/header.jspf"%>
 <body>
 	<div class="container">
 
 
-		<h2>Cheque # ${cheque.id}</h2>
+		<h2><fmt:message key="cheque.title"/> N ${cheque.id}</h2>
 		<!-- check -->
-		Shift ${cheque.shiftId} ${cheque.createdBy.name} ${cheque.date}
+		<fmt:message key="cheque.text.shift"/> ${cheque.shiftId} ${cheque.createdBy.name} ${cheque.date}
 
 		<%@ include file="fragments/messages.jspf"%>
 	</div>
@@ -45,14 +45,11 @@
 							<td><c:choose>
 									<c:when test="${empty cheque.date}">
 
-										<input type="hidden" id="chequeId" name="chequeId"
-											value="${cheque.id}">
-										<input type="hidden" id="cpId" name="cpId"
-											value="${product.id}">
-										<button formaction="editincheque"
-											class="btn btn-primary btn-sm">Edit</button>
+										<input type="hidden" id="chequeId" name="chequeId" value="${cheque.id}">
+										<input type="hidden" id="cpId" name="cpId" value="${product.id}">
+										<button formaction="editincheque" class="btn btn-primary btn-sm"><fmt:message key="cheque.button.label.edit"/></button>
 										<button formaction="removefromcheque"
-											class="btn btn-primary btn-sm">Remove</button>
+											class="btn btn-primary btn-sm"><fmt:message key="cheque.button.label.remove"/></button>
 										</form>
 									</c:when>
 									<c:otherwise>
@@ -63,7 +60,7 @@
 													value=${product.id}> <input type="hidden"
 													id="chequeId" name="chequeId" value=${cheque.id}>
 												<button type="submit" formaction="editincheque"
-													class="btn btn-primary btn-sm">Cancel</button>
+													class="btn btn-primary btn-sm"><fmt:message key="cheque.button.label.cancel"/></button>
 											</form>
 										</c:if>
 									</c:otherwise>
@@ -77,11 +74,11 @@
 					<tr>
 						<td colspan="6"><c:choose>
 								<c:when test="${not empty cheque.cancelledDate}">
-              Cancelled by ${cheque.cancelledBy.name} <br>
-                     		 on ${cheque.cancelledDate} 
+              <fmt:message key="cheques.text.status.cancelledby"/> ${cheque.cancelledBy.name} <br>
+              <fmt:message key="cheques.text.status.on"/> ${cheque.cancelledDate} 
               </c:when>
 								<c:otherwise>
-									<h3>Total cost: ${cheque.cost} grn.</h3>
+									<h3>Total cost: ${cheque.cost} <fmt:message key="app.currency"/></h3>
 								</c:otherwise>
 							</c:choose></td>
 					</tr>
@@ -91,7 +88,7 @@
 			<c:otherwise>
 				<br>
 				<br>
-				<div class="alert alert-info">No products yet in this cheque</div>
+				<div class="alert alert-info"><fmt:message key="cheque.text.noproduct"/></div>
 			</c:otherwise>
 		</c:choose>
 	</div>
@@ -102,7 +99,7 @@
 			<c:when test="${empty cheque.date}">
 				<div class="container">
 					<button type="submit" formaction="productgetall?action=addtocheque"
-						class="btn btn-primary btn-md">Add product</button>
+						class="btn btn-primary btn-md"><fmt:message key="cheque.button.label.addproduct"/></button>
 
 				</div>
 				<br>
@@ -110,14 +107,14 @@
 					<c:when test="${not empty cheque.products}">
 						<div class="container">
 							<button type="submit" formaction="chequeclose"
-								class="btn btn-info btn-md">Close this cheque</button>
+								class="btn btn-info btn-md"><fmt:message key="cheque.button.label.closecheque"/></button>
 						</div>
 						<br>
 					</c:when>
 					<c:otherwise>
 						<div class="container">
 							<button type="submit" formaction="chequedelete"
-								class="btn btn-info btn-md">Delete this cheque</button>
+								class="btn btn-info btn-md"><fmt:message key="cheque.button.label.deletecheque"/></button>
 						</div>
 						<br>
 					</c:otherwise>
@@ -131,7 +128,7 @@
 						test="${role=='MANAGER' && empty cheque.cancelledDate && not empty cheque.date}">
 						<div class="container">
 							<button type="submit" formaction="chequecancel"
-								class="btn btn-info btn-md">Cancel cheque</button>
+								class="btn btn-info btn-md"><fmt:message key="cheque.button.label.cancelcheque"/></button>
 						</div>
 					</c:if>
 				</c:forEach>

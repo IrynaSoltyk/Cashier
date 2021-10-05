@@ -34,7 +34,7 @@ public class ChequeProductDao {
 						PreparedStatement reduceSt = con.prepareStatement(changeProductAmountSql)) {
 					
 					int k = 0;
-					amountSt.setInt(++k,product.getId());
+					amountSt.setInt(++k,product.getProductId());
 					try (ResultSet rs = amountSt.executeQuery()){
 						if (!rs.next()) {
 							logger.error("No products found in products table with id "+product.getId());
